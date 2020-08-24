@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
 // import { Post } from "./entities/Post";
 import mikroConfig from "./mikro-orm.config";

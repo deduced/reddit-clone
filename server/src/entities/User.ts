@@ -3,7 +3,7 @@ import { ObjectType, Field, Int } from "type-graphql";
 
 @ObjectType() //convert class into graphql type with this decorator and Field decorator for individual fields
 @Entity()
-export class Post {
+export class User {
   @Field(() => Int) //type will be inferred but we can specifiy anyways.
   @PrimaryKey()
   id!: number;

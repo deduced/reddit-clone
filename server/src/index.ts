@@ -17,7 +17,7 @@ const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
   await orm.getMigrator().up();
 
-  const port = 3000;
+  const port = 3000; //TODO set as env variable
   const app = express();
 
   const RedisStore = connectRedis(session);

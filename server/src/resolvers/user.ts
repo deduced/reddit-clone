@@ -1,4 +1,12 @@
-import { Resolver, Mutation, InputType, Field, Arg, Ctx } from "type-graphql";
+import {
+  Resolver,
+  Mutation,
+  InputType,
+  Field,
+  Arg,
+  Ctx,
+  ObjectType,
+} from "type-graphql";
 import { MyContext } from "src/types";
 import { User } from "../entities/User";
 import argon2 from "argon2";
@@ -10,6 +18,24 @@ class UsernamePasswordInput {
 
   @Field()
   password: string;
+}
+
+@ObjectType()
+class FieldError {
+  @Field()
+  field: string;
+
+  @Field()
+  message: string;
+}
+
+@ObjectType()
+class UserResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => User, { nullable: true })
+  user?: User;
 }
 
 @Resolver()
@@ -27,5 +53,42 @@ export class UserResolver {
     await em.persistAndFlush(user);
 
     return user;
+  }
+
+  @Mutation(() => UserResponse)
+  async login(
+    @Arg("options") options: UsernamePasswordInput,
+    @Ctx() { em }: MyContext
+  ): Promise<UserResponse> {
+    const user = await em.findOne(User, {
+      username: options.username.toLowerCase(),
+    });
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username does not exist",
+          },
+        ],
+      };
+    }
+    const isValidEmail = await argon2.verify(user.password, options.password);
+
+    if (!isValidEmail) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "invalid login",
+          },
+        ],
+      };
+    }
+
+    return {
+      user,
+    };
   }
 }

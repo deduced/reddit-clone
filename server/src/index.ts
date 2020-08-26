@@ -37,6 +37,7 @@ const main = async () => {
         sameSite: "lax", //csrf protection
         secure: process.env.NODE_ENV === "production", //cookie only works in https
       },
+      saveUninitialized: false, //do not store empty session
       secret: "asldkjflwrwerbasdfhasdf", //TODO: put this in an env variable
       resave: false,
     })

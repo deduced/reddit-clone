@@ -44,6 +44,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             sameSite: "lax",
             secure: process.env.NODE_ENV === "production",
         },
+        saveUninitialized: false,
         secret: "asldkjflwrwerbasdfhasdf",
         resave: false,
     }));

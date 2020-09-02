@@ -100,12 +100,18 @@ let UserResolver = class UserResolver {
                 };
             }
             const hashedPassword = yield argon2_1.default.hash(options.password);
-            const user = em.create(User_1.User, {
-                username: options.username,
-                password: hashedPassword,
-            });
+            let user;
             try {
-                yield em.persistAndFlush(user);
+                const qb = em.createQueryBuilder(User_1.User);
+                qb.insert({
+                    username: options.username,
+                    password: hashedPassword,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                });
+                const result = yield qb.execute("get", true);
+                const userRecord = yield em.findOneOrFail(User_1.User, result);
+                user = userRecord;
             }
             catch (error) {
                 if (error.code === "23505") {
@@ -118,7 +124,6 @@ let UserResolver = class UserResolver {
                         ],
                     };
                 }
-                console.log("message", error);
             }
             req.session.userId = user.id;
             return { user };

@@ -11,6 +11,7 @@ import {
 import { MyContext } from "src/types";
 import { User } from "../entities/User";
 import argon2 from "argon2";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class UsernamePasswordInput {
@@ -80,12 +81,22 @@ export class UserResolver {
       };
     }
     const hashedPassword = await argon2.hash(options.password);
-    const user = em.create(User, {
-      username: options.username,
-      password: hashedPassword,
-    });
+
+    let user;
+
     try {
-      await em.persistAndFlush(user);
+      //Refactor mikro-orm persist and flush to query builder
+      const qb = (em as EntityManager).createQueryBuilder(User);
+      qb.insert({
+        username: options.username,
+        password: hashedPassword,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      const result = await qb.execute("get", true);
+      const userRecord = await em.findOneOrFail(User, result);
+      user = userRecord;
     } catch (error) {
       if (
         error.code === "23505"
@@ -101,8 +112,6 @@ export class UserResolver {
           ],
         };
       }
-
-      console.log("message", error);
     }
 
     // Store user id in session object

@@ -12,6 +12,7 @@ import connectRedis from "connect-redis";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import { COOKIE_NAME } from "./constants";
 
 const main = async () => {
   const orm = await MikroORM.init(mikroConfig);
@@ -34,7 +35,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTTL: true, //TODO: check if this is needed

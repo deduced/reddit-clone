@@ -20,6 +20,10 @@ export class User {
   @Property({ type: "text", unique: true })
   username!: string;
 
+  @Field() // no specific type needed as it can be inferred
+  @Property({ type: "text", unique: true })
+  email!: string;
+
   @Property({ type: "text" })
   password!: string;
 }

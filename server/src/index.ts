@@ -22,7 +22,7 @@ const main = async () => {
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redis = Redis();
+  const redis = new Redis();
 
 
   //apply cors globally (all routes)

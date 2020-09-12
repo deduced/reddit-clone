@@ -11,7 +11,7 @@ import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Login: React.FC<{}> = ({}) => {
   const router = useRouter();
-  const [_, login] = useLoginMutation();
+  const [, login] = useLoginMutation();
 
   return (
     <Wrapper variant="small">
@@ -30,7 +30,7 @@ const Login: React.FC<{}> = ({}) => {
           }
         }}
       >
-        {({ isSubmitting, handleChange, values }) => (
+        {({ isSubmitting }) => (
           <Form>
             <InputField
               label="Username or Email"

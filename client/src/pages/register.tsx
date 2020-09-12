@@ -13,7 +13,7 @@ interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
   const router = useRouter();
-  const [_, register] = useRegisterMutation();
+  const [, register] = useRegisterMutation();
 
   return (
     <Wrapper variant="small">
@@ -32,7 +32,7 @@ const Register: React.FC<registerProps> = ({}) => {
           }
         }}
       >
-        {({ isSubmitting, handleChange, values }) => (
+        {({ isSubmitting }) => (
           <Form>
             <InputField
               label="Username"

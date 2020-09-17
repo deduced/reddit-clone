@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from "type-graphql";
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { User } from "./User";
 
 @ObjectType() //convert class into graphql type with this decorator and Field decorator for individual fields
 @Entity()
@@ -8,6 +9,27 @@ export class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
+
+  @Field()
+  @Column()
+  title!: string;
+
+  @Field()
+  @Column()
+  text!: string;
+
+  @Field()
+  @Column({ type: "int", default: 0 })
+  points!: number;
+
+
+  @Field()
+  @Column()
+  creatorId: number;
+
+  @ManyToOne(() => User, user => user.posts)
+  creator: User;
+
   @Field(() => String) //Type needed as it cannot be inferred by default for date. if not available, NoExplicitTypeError will occur
   @CreateDateColumn()
   createdAt: Date;
@@ -15,8 +37,4 @@ export class Post extends BaseEntity {
   @Field(() => String) //Type needed as it cannot be inferred by default for date
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Field()
-  @Column()
-  title!: string;
 }

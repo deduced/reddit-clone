@@ -25,7 +25,6 @@ const main = async () => {
     entities: [Post, User]
   })
 
-
   const port = 4000; //TODO set as env variable
   const app = express();
 

@@ -10,12 +10,12 @@ import {
 import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from "argon2";
-import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 as genUUID } from "uuid";
+import { getConnection } from "typeorm";
 
 @ObjectType()
 class FieldError {
@@ -42,7 +42,7 @@ export class UserResolver {
   async changePassword(
     @Arg('token') token: string,
     @Arg('newPassword') newPassword: string,
-    @Ctx() { em, req, redis }: MyContext
+    @Ctx() { req, redis }: MyContext
 
   ): Promise<UserResponse> {
 
@@ -58,9 +58,9 @@ export class UserResolver {
     }
 
     const key = FORGET_PASSWORD_PREFIX + token;
-    const userId = await redis.get(key)
+    const userIdStr = await redis.get(key)
 
-    if (!userId) {
+    if (!userIdStr) {
       return {
         errors: [{
           field: "token",
@@ -69,7 +69,8 @@ export class UserResolver {
       }
     }
 
-    const user = await em.findOne(User, { id: parseInt(userId) })
+    const userId = parseInt(userIdStr);
+    const user = await User.findOne(userId)
 
     if (!user) {
       return {
@@ -80,10 +81,7 @@ export class UserResolver {
       }
     }
 
-
-
-    user.password = await argon2.hash(newPassword);
-    await em.persistAndFlush(user);
+    await User.update({ id: userId }, { password: await argon2.hash(newPassword); })
 
     await redis.del(key); //delete key after successful change password. 
 
@@ -94,8 +92,8 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string, @Ctx() { em, redis }: MyContext) {
-    const user = await em.findOne(User, { email })
+  async forgotPassword(@Arg("email") email: string, @Ctx() { redis }: MyContext) {
+    const user = await User.findOne({ where: { email } })
 
     if (!user) {
       //no user with email in db
@@ -113,21 +111,20 @@ export class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext) {
+  me(@Ctx() { req }: MyContext) {
     //user not logged in
     if (!req.session.userId) {
       return null;
     }
 
-    const user = await em.findOne(User, { id: req.session.userId });
+    return User.findOne(req.session.userId);
 
-    return user;
   }
 
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
 
     const errors = validateRegister(options)
@@ -141,19 +138,14 @@ export class UserResolver {
     let user;
 
     try {
-      //Refactor mikro-orm persist and flush to query builder
-      const qb = (em as EntityManager).createQueryBuilder(User);
-      qb.insert({
+      user = await User.create({
         email: options.email,
         password: hashedPassword,
         username: options.username,
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
+      }).save()
 
-      const result = await qb.execute("get", true);
-      const userRecord = await em.findOneOrFail(User, result);
-      user = userRecord;
+
+
     } catch (error) {
       if (
         error.code === "23505"
@@ -171,6 +163,18 @@ export class UserResolver {
       }
     }
 
+    //If user is undefined for some reason
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "Problem creating user. Try again."
+          }
+        ]
+      }
+    }
+
     // Store user id in session object
     // sets cookie for user to keep logged in
     req.session.userId = user.id;
@@ -182,11 +186,13 @@ export class UserResolver {
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, usernameOrEmail.includes("@") ? {
-      email: usernameOrEmail.toLowerCase(),
-    } : { username: usernameOrEmail.toLowerCase() });
+    const user = await User.findOne(
+      usernameOrEmail.includes("@")
+        ? { where: { email: usernameOrEmail.toLowerCase() } }
+        : { where: { username: usernameOrEmail.toLowerCase() } }
+    );
 
     if (!user) {
       return {

@@ -1,22 +1,22 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { ObjectType, Field, Int } from "type-graphql";
+import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @ObjectType() //convert class into graphql type with this decorator and Field decorator for individual fields
 @Entity()
-export class Post {
-  @Field(() => Int) //type will be inferred but we can specifiy anyways.
-  @PrimaryKey()
+export class Post extends BaseEntity {
+  @Field()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Field(() => String) //Type needed as it cannot be inferred by default for date. if not available, NoExplicitTypeError will occur
-  @Property({ type: "date" })
-  createdAt = new Date();
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Field(() => String) //Type needed as it cannot be inferred by default for date
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-  @Field() // no specific type needed as it can be inferred
-  @Property({ type: "text" })
+  @Field()
+  @Column()
   title!: string;
 }

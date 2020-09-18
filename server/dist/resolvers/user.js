@@ -69,27 +69,31 @@ let UserResolver = class UserResolver {
                             field: "newPassword",
                             message: "length must be greater than 2",
                         },
-                    ]
+                    ],
                 };
             }
             const key = constants_1.FORGET_PASSWORD_PREFIX + token;
             const userIdStr = yield redis.get(key);
             if (!userIdStr) {
                 return {
-                    errors: [{
+                    errors: [
+                        {
                             field: "token",
-                            message: "token expired"
-                        }]
+                            message: "token expired",
+                        },
+                    ],
                 };
             }
             const userId = parseInt(userIdStr);
             const user = yield User_1.User.findOne(userId);
             if (!user) {
                 return {
-                    errors: [{
+                    errors: [
+                        {
                             field: "token",
-                            message: "user no longer exists"
-                        }]
+                            message: "user no longer exists",
+                        },
+                    ],
                 };
             }
             yield User_1.User.update({ id: userId }, { password: yield argon2_1.default.hash(newPassword) });
@@ -106,7 +110,7 @@ let UserResolver = class UserResolver {
             }
             const token = uuid_1.v4();
             const key = constants_1.FORGET_PASSWORD_PREFIX + token;
-            yield redis.set(key, user.id, 'ex', 1000 * 60 * 60 * 24 * 3);
+            yield redis.set(key, user.id, "ex", 1000 * 60 * 60 * 24 * 3);
             yield sendEmail_1.sendEmail(email, "Password Reset", `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`);
             return true;
         });
@@ -149,9 +153,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "username",
-                            message: "Problem creating user. Try again."
-                        }
-                    ]
+                            message: "Problem creating user. Try again.",
+                        },
+                    ],
                 };
             }
             req.session.userId = user.id;
@@ -204,8 +208,8 @@ let UserResolver = class UserResolver {
 };
 __decorate([
     type_graphql_1.Mutation(() => UserResponse),
-    __param(0, type_graphql_1.Arg('token')),
-    __param(1, type_graphql_1.Arg('newPassword')),
+    __param(0, type_graphql_1.Arg("token")),
+    __param(1, type_graphql_1.Arg("newPassword")),
     __param(2, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, Object]),
@@ -213,7 +217,8 @@ __decorate([
 ], UserResolver.prototype, "changePassword", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
-    __param(0, type_graphql_1.Arg("email")), __param(1, type_graphql_1.Ctx()),
+    __param(0, type_graphql_1.Arg("email")),
+    __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)

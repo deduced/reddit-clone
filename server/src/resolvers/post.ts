@@ -1,26 +1,34 @@
 import { MyContext } from "src/types";
-import { Resolver, Query, Arg, Mutation, InputType, Field, Ctx } from "type-graphql";
+import {
+  Resolver,
+  Query,
+  Arg,
+  Mutation,
+  InputType,
+  Field,
+  Ctx,
+} from "type-graphql";
 import { Post } from "../entities/Post";
 
 @InputType()
 class PostInput {
   @Field()
-  title: string
+  title: string;
 
   @Field()
-  text: string
+  text: string;
 }
 
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
   posts(): Promise<Post[]> {
-    return Post.find()
+    return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id)
+    return Post.findOne(id);
   }
 
   @Mutation(() => Post)
@@ -28,40 +36,38 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
   ): Promise<Post> {
-
-    if (!req.session.userId) { //user not logged in
-      throw new Error("not authenticated")
+    if (!req.session.userId) {
+      //user not logged in
+      throw new Error("not authenticated");
     }
 
     return Post.create({
       ...input,
-      creatorId: req.session.userId
-    }).save()
+      creatorId: req.session.userId,
+    }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg("id") id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
+    @Arg("title", () => String, { nullable: true }) title: string
   ): Promise<Post | null> {
-    const post = await Post.findOne(id)
+    const post = await Post.findOne(id);
 
     if (!post) {
       return null;
     }
 
     if (typeof title != undefined) {
-      await Post.update({ id }, { title })
+      await Post.update({ id }, { title });
     }
     return post;
   }
 
   @Mutation(() => Boolean)
-  async deletePost(
-    @Arg("id") id: number,
-  ): Promise<boolean> {
+  async deletePost(@Arg("id") id: number): Promise<boolean> {
     try {
-      await Post.delete(id)
+      await Post.delete(id);
     } catch (error) {
       console.error(error.message);
       return false;

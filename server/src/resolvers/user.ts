@@ -36,15 +36,12 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-
   @Mutation(() => UserResponse)
   async changePassword(
-    @Arg('token') token: string,
-    @Arg('newPassword') newPassword: string,
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
     @Ctx() { req, redis }: MyContext
-
   ): Promise<UserResponse> {
-
     if (newPassword.length <= 2) {
       return {
         errors: [
@@ -52,37 +49,44 @@ export class UserResolver {
             field: "newPassword",
             message: "length must be greater than 2",
           },
-        ]
-      }
+        ],
+      };
     }
 
     const key = FORGET_PASSWORD_PREFIX + token;
-    const userIdStr = await redis.get(key)
+    const userIdStr = await redis.get(key);
 
     if (!userIdStr) {
       return {
-        errors: [{
-          field: "token",
-          message: "token expired"
-        }]
-      }
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
     }
 
     const userId = parseInt(userIdStr);
-    const user = await User.findOne(userId)
+    const user = await User.findOne(userId);
 
     if (!user) {
       return {
-        errors: [{
-          field: "token",
-          message: "user no longer exists"
-        }]
-      }
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
     }
 
-    await User.update({ id: userId }, { password: await argon2.hash(newPassword); })
+    await User.update(
+      { id: userId },
+      { password: await argon2.hash(newPassword) }
+    );
 
-    await redis.del(key); //delete key after successful change password. 
+    await redis.del(key); //delete key after successful change password.
 
     //log in user after change password
     req.session.userId = user.id;
@@ -91,8 +95,11 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string, @Ctx() { redis }: MyContext) {
-    const user = await User.findOne({ where: { email } })
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { redis }: MyContext
+  ) {
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       //no user with email in db
@@ -101,10 +108,13 @@ export class UserResolver {
 
     const token = genUUID();
     const key = FORGET_PASSWORD_PREFIX + token; //redis key
-    await redis.set(key, user.id, 'ex', 1000 * 60 * 60 * 24 * 3); //3 day expiration
+    await redis.set(key, user.id, "ex", 1000 * 60 * 60 * 24 * 3); //3 day expiration
 
-    await sendEmail(email, "Password Reset", `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`)
-
+    await sendEmail(
+      email,
+      "Password Reset",
+      `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`
+    );
 
     return true;
   }
@@ -117,7 +127,6 @@ export class UserResolver {
     }
 
     return User.findOne(req.session.userId);
-
   }
 
   @Mutation(() => UserResponse)
@@ -125,11 +134,10 @@ export class UserResolver {
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-
-    const errors = validateRegister(options)
+    const errors = validateRegister(options);
 
     if (errors) {
-      return { errors }
+      return { errors };
     }
 
     const hashedPassword = await argon2.hash(options.password);
@@ -141,10 +149,7 @@ export class UserResolver {
         email: options.email,
         password: hashedPassword,
         username: options.username,
-      }).save()
-
-
-
+      }).save();
     } catch (error) {
       if (
         error.code === "23505"
@@ -168,10 +173,10 @@ export class UserResolver {
         errors: [
           {
             field: "username",
-            message: "Problem creating user. Try again."
-          }
-        ]
-      }
+            message: "Problem creating user. Try again.",
+          },
+        ],
+      };
     }
 
     // Store user id in session object

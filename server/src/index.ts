@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { createConnection } from 'typeorm';
+import { createConnection } from "typeorm";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -17,20 +17,19 @@ import { User } from "./entities/User";
 
 const main = async () => {
   const conn = await createConnection({
-    type: 'postgres',
-    database: 'reddit_clone_dev',
-    username: 'charlieastrada',
+    type: "postgres",
+    database: "reddit_clone_dev",
+    username: "charlieastrada",
     logging: true,
     synchronize: true,
-    entities: [Post, User]
-  })
+    entities: [Post, User],
+  });
 
   const port = 4000; //TODO set as env variable
   const app = express();
 
   const RedisStore = connectRedis(session);
   const redis = new Redis();
-
 
   //apply cors globally (all routes)
   //set to work with client cookies

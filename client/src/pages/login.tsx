@@ -24,8 +24,10 @@ const Login: React.FC<{}> = ({}) => {
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
-            //if no errors, and we get a user after succcessful registration, redirect to root
-            router.push("/");
+            //redirect is query param set in hooks/useIsAuth
+            router.query.redirect
+              ? router.push(String(router.query?.redirect))
+              : router.push("/");
           } else {
             console.error(response);
           }

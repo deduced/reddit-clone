@@ -14,6 +14,7 @@ import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME } from "./constants";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import path from "path";
 
 const main = async () => {
   const conn = await createConnection({
@@ -23,7 +24,10 @@ const main = async () => {
     logging: true,
     synchronize: true,
     entities: [Post, User],
+    migrations: [path.join(__dirname, "./migrations/*")],
   });
+
+  await conn.runMigrations();
 
   const port = 4000; //TODO set as env variable
   const app = express();

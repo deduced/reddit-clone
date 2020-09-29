@@ -12,6 +12,7 @@ import {
   Int,
   FieldResolver,
   Root,
+  ObjectType
 } from "type-graphql";
 import { Post } from "../entities/Post";
 import { MyContext } from "../types";
@@ -26,6 +27,15 @@ class PostInput {
   text: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+
+  @Field()
+  hasMore: boolean;
+}
+
 @Resolver(Post)
 export class PostResolver {
   //generate textSnippet from a Post and make available to client
@@ -34,23 +44,31 @@ export class PostResolver {
     return `${root.text.slice(0, 100)}...`;
   }
 
-  @Query(() => [Post])
-  posts(
+  @Query(() => PaginatedPosts)
+  async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null //null is allowed as no cursor on first run
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
+    //used to check  if there are more posts available after loadMore button pressed
+    const realLimitPlusOne = realLimit + 1;
+
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p") //alias
       .orderBy(`"createdAt"`, "DESC")
-      .take(realLimit); //recommended rather than limit for pagination https://typeorm.io/#select-query-builder/adding-limit-expression
+      .take(realLimitPlusOne); //recommended rather than limit for pagination https://typeorm.io/#select-query-builder/adding-limit-expression
 
     if (cursor) {
       qb.where(`"createdAt" < :cursor`, { cursor: new Date(parseInt(cursor)) });
     }
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne //if not equal, there are no more posts available
+    };
   }
 
   @Query(() => Post, { nullable: true })
@@ -66,7 +84,7 @@ export class PostResolver {
   ): Promise<Post> {
     return Post.create({
       ...input,
-      creatorId: req.session.userId,
+      creatorId: req.session.userId
     }).save();
   }
 

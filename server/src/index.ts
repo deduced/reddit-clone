@@ -29,6 +29,8 @@ const main = async () => {
 
   await conn.runMigrations();
 
+  // await Post.delete({});
+
   const port = 4000; //TODO set as env variable
   const app = express();
 

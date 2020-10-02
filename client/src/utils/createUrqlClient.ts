@@ -71,7 +71,7 @@ const cursorPagination = (cursorArgument = "cursor"): Resolver => {
     console.log("results: ", results, hasMore);
 
     return {
-      // __typename: "PaginatedPosts",
+      __typename: "PaginatedPosts",
       hasMore,
       posts: results,
     };

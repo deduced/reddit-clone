@@ -28,6 +28,7 @@ const constants_1 = require("./constants");
 const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
 const path_1 = __importDefault(require("path"));
+const Upvote_1 = require("./entities/Upvote");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: "postgres",
@@ -35,8 +36,8 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         username: "charlieastrada",
         logging: true,
         synchronize: true,
-        entities: [Post_1.Post, User_1.User],
-        migrations: [path_1.default.join(__dirname, "./migrations/*")],
+        entities: [Post_1.Post, User_1.User, Upvote_1.Upvote],
+        migrations: [path_1.default.join(__dirname, "./migrations/*")]
     });
     yield conn.runMigrations();
     const port = 4000;
@@ -45,35 +46,35 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const redis = new ioredis_1.default();
     app.use(cors_1.default({
         origin: "http://localhost:3000",
-        credentials: true,
+        credentials: true
     }));
     app.use(express_session_1.default({
         name: constants_1.COOKIE_NAME,
         store: new RedisStore({
             client: redis,
             disableTTL: true,
-            disableTouch: true,
+            disableTouch: true
         }),
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
             sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV === "production"
         },
         saveUninitialized: false,
         secret: "asldkjflwrwerbasdfhasdf",
-        resave: false,
+        resave: false
     }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({
             resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
-            validate: false,
+            validate: false
         }),
-        context: ({ req, res }) => ({ req, res, redis }),
+        context: ({ req, res }) => ({ req, res, redis })
     });
     apolloServer.applyMiddleware({
         app,
-        cors: false,
+        cors: false
     });
     app.listen(port, () => {
         console.log(`Server started on port: ${port}`);

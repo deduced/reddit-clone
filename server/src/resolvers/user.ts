@@ -5,7 +5,9 @@ import {
   Arg,
   Ctx,
   ObjectType,
-  Query,, FieldResolver, Root
+  Query,
+  FieldResolver,
+  Root
 } from "type-graphql";
 import { MyContext } from "../types";
 import { User } from "../entities/User";
@@ -37,16 +39,15 @@ class UserResponse {
 @Resolver(User)
 export class UserResolver {
   @FieldResolver(() => String)
-  email(@Root() user: User, @Ctx() {req}: MyContext ){
-    console.log("user: ", user)
-    console.log("currentUser: ", req.session.userId)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    console.log("user: ", user);
+    console.log("currentUser: ", req.session.userId);
     //current user logged in and ok to show email
     if (req.session.userId === user.id) {
-     return user.email       
+      return user.email;
     }
     //current user wants to see another user's email and we do not allow it
-    return ""
-
+    return "";
   }
 
   @Mutation(() => UserResponse)

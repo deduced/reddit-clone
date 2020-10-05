@@ -5,10 +5,11 @@ import {
   CreateDateColumn,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Entity } from "typeorm/decorator/entity/Entity";
 import { Post } from "./Post";
+import { Upvote } from "./Upvote";
 
 @ObjectType() //convert class into graphql type with this decorator and Field decorator for individual fields
 @Entity()
@@ -30,6 +31,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Post, (post) => post.creator)
   posts: Post[];
+
+  @OneToMany(() => Upvote, (upvote) => upvote.user)
+  upvotes: Upvote[];
 
   @Field(() => String) //Type needed as it cannot be inferred by default for date. if not available, NoExplicitTypeError will occur
   @CreateDateColumn()

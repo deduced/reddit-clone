@@ -15,6 +15,7 @@ import { COOKIE_NAME } from "./constants";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import path from "path";
+import { Upvote } from "./entities/Upvote";
 
 const main = async () => {
   const conn = await createConnection({
@@ -23,8 +24,8 @@ const main = async () => {
     username: "charlieastrada",
     logging: true,
     synchronize: true,
-    entities: [Post, User],
-    migrations: [path.join(__dirname, "./migrations/*")],
+    entities: [Post, User, Upvote],
+    migrations: [path.join(__dirname, "./migrations/*")]
   });
 
   await conn.runMigrations();
@@ -42,7 +43,7 @@ const main = async () => {
   app.use(
     cors({
       origin: "http://localhost:3000",
-      credentials: true,
+      credentials: true
     })
   );
 
@@ -52,32 +53,32 @@ const main = async () => {
       store: new RedisStore({
         client: redis,
         disableTTL: true, //TODO: check if this is needed
-        disableTouch: true, //Session has no TTL so disable touch to avoid unnecessary requests
+        disableTouch: true //Session has no TTL so disable touch to avoid unnecessary requests
       }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true, //security - ensures frontend code cannot access cookie
         sameSite: "lax", //csrf protection
-        secure: process.env.NODE_ENV === "production", //cookie only works in https
+        secure: process.env.NODE_ENV === "production" //cookie only works in https
       },
       saveUninitialized: false, //do not store empty session
       secret: "asldkjflwrwerbasdfhasdf", //TODO: put this in an env variable
-      resave: false,
+      resave: false
     })
   );
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
-      validate: false,
+      validate: false
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }) => ({ req, res, redis })
   });
 
   //create graphql endpoint on express
   apolloServer.applyMiddleware({
     app,
-    cors: false,
+    cors: false
   });
 
   app.listen(port, () => {

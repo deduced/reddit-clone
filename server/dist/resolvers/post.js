@@ -82,7 +82,6 @@ let PostResolver = class PostResolver {
     limit $1
 
     `, replacements);
-            console.log("Posts: ", posts);
             return {
                 posts: posts.slice(0, realLimit),
                 hasMore: posts.length === realLimitPlusOne

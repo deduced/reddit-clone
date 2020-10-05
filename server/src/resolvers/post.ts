@@ -97,7 +97,7 @@ export class PostResolver {
 
     // const posts = await qb.getMany();
 
-    console.log("Posts: ", posts);
+    // console.log("Posts: ", posts);
 
     return {
       posts: posts.slice(0, realLimit),

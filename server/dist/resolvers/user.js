@@ -60,6 +60,14 @@ UserResponse = __decorate([
     type_graphql_1.ObjectType()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    email(user, { req }) {
+        console.log("user: ", user);
+        console.log("currentUser: ", req.session.userId);
+        if (req.session.userId === user.id) {
+            return user.email;
+        }
+        return "";
+    }
     changePassword(token, newPassword, { req, redis }) {
         return __awaiter(this, void 0, void 0, function* () {
             if (newPassword.length <= 2) {
@@ -67,9 +75,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "newPassword",
-                            message: "length must be greater than 2",
-                        },
-                    ],
+                            message: "length must be greater than 2"
+                        }
+                    ]
                 };
             }
             const key = constants_1.FORGET_PASSWORD_PREFIX + token;
@@ -79,9 +87,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "token",
-                            message: "token expired",
-                        },
-                    ],
+                            message: "token expired"
+                        }
+                    ]
                 };
             }
             const userId = parseInt(userIdStr);
@@ -91,9 +99,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "token",
-                            message: "user no longer exists",
-                        },
-                    ],
+                            message: "user no longer exists"
+                        }
+                    ]
                 };
             }
             yield User_1.User.update({ id: userId }, { password: yield argon2_1.default.hash(newPassword) });
@@ -133,7 +141,7 @@ let UserResolver = class UserResolver {
                 user = yield User_1.User.create({
                     email: options.email,
                     password: hashedPassword,
-                    username: options.username,
+                    username: options.username
                 }).save();
             }
             catch (error) {
@@ -142,9 +150,9 @@ let UserResolver = class UserResolver {
                         errors: [
                             {
                                 field: "username",
-                                message: "username already taken.",
-                            },
-                        ],
+                                message: "username already taken."
+                            }
+                        ]
                     };
                 }
             }
@@ -153,9 +161,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "username",
-                            message: "Problem creating user. Try again.",
-                        },
-                    ],
+                            message: "Problem creating user. Try again."
+                        }
+                    ]
                 };
             }
             req.session.userId = user.id;
@@ -172,9 +180,9 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "usernameOrEmail",
-                            message: "username does not exist",
-                        },
-                    ],
+                            message: "username does not exist"
+                        }
+                    ]
                 };
             }
             const isValidEmail = yield argon2_1.default.verify(user.password, password);
@@ -183,14 +191,14 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "password",
-                            message: "invalid login",
-                        },
-                    ],
+                            message: "invalid login"
+                        }
+                    ]
                 };
             }
             req.session.userId = user.id;
             return {
-                user,
+                user
             };
         });
     }
@@ -206,6 +214,13 @@ let UserResolver = class UserResolver {
         }));
     }
 };
+__decorate([
+    type_graphql_1.FieldResolver(() => String),
+    __param(0, type_graphql_1.Root()), __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [User_1.User, Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "email", null);
 __decorate([
     type_graphql_1.Mutation(() => UserResponse),
     __param(0, type_graphql_1.Arg("token")),
@@ -255,7 +270,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserResolver.prototype, "logout", null);
 UserResolver = __decorate([
-    type_graphql_1.Resolver()
+    type_graphql_1.Resolver(User_1.User)
 ], UserResolver);
 exports.UserResolver = UserResolver;
 //# sourceMappingURL=user.js.map

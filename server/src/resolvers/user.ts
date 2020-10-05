@@ -5,7 +5,7 @@ import {
   Arg,
   Ctx,
   ObjectType,
-  Query,
+  Query,, FieldResolver, Root
 } from "type-graphql";
 import { MyContext } from "../types";
 import { User } from "../entities/User";
@@ -34,8 +34,21 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() {req}: MyContext ){
+    console.log("user: ", user)
+    console.log("currentUser: ", req.session.userId)
+    //current user logged in and ok to show email
+    if (req.session.userId === user.id) {
+     return user.email       
+    }
+    //current user wants to see another user's email and we do not allow it
+    return ""
+
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg("token") token: string,
@@ -47,9 +60,9 @@ export class UserResolver {
         errors: [
           {
             field: "newPassword",
-            message: "length must be greater than 2",
-          },
-        ],
+            message: "length must be greater than 2"
+          }
+        ]
       };
     }
 
@@ -61,9 +74,9 @@ export class UserResolver {
         errors: [
           {
             field: "token",
-            message: "token expired",
-          },
-        ],
+            message: "token expired"
+          }
+        ]
       };
     }
 
@@ -75,9 +88,9 @@ export class UserResolver {
         errors: [
           {
             field: "token",
-            message: "user no longer exists",
-          },
-        ],
+            message: "user no longer exists"
+          }
+        ]
       };
     }
 
@@ -148,7 +161,7 @@ export class UserResolver {
       user = await User.create({
         email: options.email,
         password: hashedPassword,
-        username: options.username,
+        username: options.username
       }).save();
     } catch (error) {
       if (
@@ -160,9 +173,9 @@ export class UserResolver {
           errors: [
             {
               field: "username",
-              message: "username already taken.",
-            },
-          ],
+              message: "username already taken."
+            }
+          ]
         };
       }
     }
@@ -173,9 +186,9 @@ export class UserResolver {
         errors: [
           {
             field: "username",
-            message: "Problem creating user. Try again.",
-          },
-        ],
+            message: "Problem creating user. Try again."
+          }
+        ]
       };
     }
 
@@ -203,9 +216,9 @@ export class UserResolver {
         errors: [
           {
             field: "usernameOrEmail",
-            message: "username does not exist",
-          },
-        ],
+            message: "username does not exist"
+          }
+        ]
       };
     }
     const isValidEmail = await argon2.verify(user.password, password);
@@ -215,16 +228,16 @@ export class UserResolver {
         errors: [
           {
             field: "password",
-            message: "invalid login",
-          },
-        ],
+            message: "invalid login"
+          }
+        ]
       };
     }
 
     req.session.userId = user.id; //store current user ID in session object
 
     return {
-      user,
+      user
     };
   }
 

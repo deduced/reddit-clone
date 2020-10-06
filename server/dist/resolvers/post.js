@@ -62,20 +62,43 @@ let PostResolver = class PostResolver {
             const isUpvote = value > 0;
             const realValue = isUpvote ? 1 : -1;
             const { userId } = req.session;
+            const upvote = yield Upvote_1.Upvote.findOne({ where: { postId, userId } });
+            console.log("upvote", upvote, realValue);
             try {
-                yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
-                    yield Upvote_1.Upvote.insert({
-                        userId,
-                        postId,
-                        value: realValue
-                    });
-                    yield typeorm_1.getConnection()
-                        .createQueryBuilder()
-                        .update(Post_1.Post)
-                        .set({ points: () => `points + ${realValue}` })
-                        .where("post.id = :postId", { postId })
-                        .execute();
-                }));
+                if (upvote && upvote.value !== realValue) {
+                    yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
+                        yield typeorm_1.getConnection()
+                            .createQueryBuilder()
+                            .update(Upvote_1.Upvote)
+                            .set({ value: realValue })
+                            .where('upvote."postId" = :postId and upvote."userId" = :userId', {
+                            postId,
+                            userId
+                        })
+                            .execute();
+                        yield typeorm_1.getConnection()
+                            .createQueryBuilder()
+                            .update(Post_1.Post)
+                            .set({ points: () => `points + ${realValue * 2}` })
+                            .where("post.id = :postId", { postId })
+                            .execute();
+                    }));
+                }
+                else if (!upvote) {
+                    yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
+                        yield Upvote_1.Upvote.insert({
+                            userId,
+                            postId,
+                            value: realValue
+                        });
+                        yield typeorm_1.getConnection()
+                            .createQueryBuilder()
+                            .update(Post_1.Post)
+                            .set({ points: () => `points + ${realValue}` })
+                            .where("post.id = :postId", { postId })
+                            .execute();
+                    }));
+                }
                 return true;
             }
             catch (error) {

@@ -56,21 +56,48 @@ export class PostResolver {
     const realValue = isUpvote ? 1 : -1;
     const { userId } = req.session;
 
-    try {
-      await getConnection().transaction(async () => {
-        await Upvote.insert({
-          userId,
-          postId,
-          value: realValue
-        });
+    const upvote = await Upvote.findOne({ where: { postId, userId } });
+    console.log("upvote", upvote, realValue);
 
-        await getConnection()
-          .createQueryBuilder()
-          .update(Post)
-          .set({ points: () => `points + ${realValue}` })
-          .where("post.id = :postId", { postId })
-          .execute();
-      });
+    try {
+      //the user voted  on post already
+      //and is changing vote
+      if (upvote && upvote.value !== realValue) {
+        await getConnection().transaction(async () => {
+          await getConnection()
+            .createQueryBuilder()
+            .update(Upvote)
+            .set({ value: realValue })
+            .where('upvote."postId" = :postId and upvote."userId" = :userId', {
+              postId,
+              userId
+            })
+            .execute();
+
+          await getConnection()
+            .createQueryBuilder()
+            .update(Post)
+            .set({ points: () => `points + ${realValue * 2}` }) //points needs to move 2x when changing vote
+            .where("post.id = :postId", { postId })
+            .execute();
+        });
+      } else if (!upvote) {
+        // has not voted on post yet
+        await getConnection().transaction(async () => {
+          await Upvote.insert({
+            userId,
+            postId,
+            value: realValue
+          });
+
+          await getConnection()
+            .createQueryBuilder()
+            .update(Post)
+            .set({ points: () => `points + ${realValue}` })
+            .where("post.id = :postId", { postId })
+            .execute();
+        });
+      }
 
       return true;
     } catch (error) {

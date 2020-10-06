@@ -62,20 +62,26 @@ let PostResolver = class PostResolver {
             const isUpvote = value > 0;
             const realValue = isUpvote ? 1 : -1;
             const { userId } = req.session;
-            yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
-                yield Upvote_1.Upvote.insert({
-                    userId,
-                    postId,
-                    value: realValue
-                });
-                yield typeorm_1.getConnection()
-                    .createQueryBuilder()
-                    .update(Post_1.Post)
-                    .set({ points: () => `points + ${realValue}` })
-                    .where("post.id = :postId", { postId })
-                    .execute();
-            }));
-            return true;
+            try {
+                yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
+                    yield Upvote_1.Upvote.insert({
+                        userId,
+                        postId,
+                        value: realValue
+                    });
+                    yield typeorm_1.getConnection()
+                        .createQueryBuilder()
+                        .update(Post_1.Post)
+                        .set({ points: () => `points + ${realValue}` })
+                        .where("post.id = :postId", { postId })
+                        .execute();
+                }));
+                return true;
+            }
+            catch (error) {
+                console.log(error);
+                return false;
+            }
         });
     }
     posts(limit, cursor) {

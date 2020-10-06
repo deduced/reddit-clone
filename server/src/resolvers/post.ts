@@ -56,20 +56,27 @@ export class PostResolver {
     const realValue = isUpvote ? 1 : -1;
     const { userId } = req.session;
 
-    await getConnection().transaction(async () => {
-      await Upvote.insert({
-        userId,
-        postId,
-        value: realValue
+    try {
+      await getConnection().transaction(async () => {
+        await Upvote.insert({
+          userId,
+          postId,
+          value: realValue
+        });
+
+        await getConnection()
+          .createQueryBuilder()
+          .update(Post)
+          .set({ points: () => `points + ${realValue}` })
+          .where("post.id = :postId", { postId })
+          .execute();
       });
 
-      await getConnection()
-        .createQueryBuilder()
-        .update(Post)
-        .set({ points: () => `points + ${realValue}` })
-        .where("post.id = :postId", { postId })
-        .execute();
-    });
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     // getConnection().query(
     //   `
@@ -79,8 +86,6 @@ export class PostResolver {
     // `,
     //   [realValue, postId]
     // );
-
-    return true;
   }
 
   @Query(() => PaginatedPosts)

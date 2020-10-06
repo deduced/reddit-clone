@@ -1,9 +1,9 @@
 import { Flex, IconButton } from "@chakra-ui/core";
 import React from "react";
-import { PostsQuery } from "../generated/graphql";
+import { PostFieldsFragment } from "../generated/graphql";
 
 interface VotePanelProps {
-  post: PostsQuery["posts"]["posts"][0];
+  post: PostFieldsFragment;
 }
 
 export const VotePanel: React.FC<VotePanelProps> = ({ post }) => {

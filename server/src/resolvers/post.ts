@@ -57,7 +57,6 @@ export class PostResolver {
     const { userId } = req.session;
 
     const upvote = await Upvote.findOne({ where: { postId, userId } });
-    console.log("upvote", upvote, realValue);
 
     try {
       //the user voted  on post already

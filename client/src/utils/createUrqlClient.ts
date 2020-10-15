@@ -7,7 +7,6 @@ import {
 } from "urql";
 import { pipe, tap } from "wonka";
 import {
-  CreatePostMutationVariables,
   LoginMutation,
   LogoutMutation,
   MeDocument,

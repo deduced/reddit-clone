@@ -62,8 +62,8 @@ export class PostResolver {
       //the user voted  on post already
       //and is changing vote
       if (upvote && upvote.value !== realValue) {
-        await getConnection().transaction(async () => {
-          await getConnection()
+        await getConnection().transaction(async (tm) => {
+          await tm
             .createQueryBuilder()
             .update(Upvote)
             .set({ value: realValue })
@@ -73,7 +73,7 @@ export class PostResolver {
             })
             .execute();
 
-          await getConnection()
+          await tm
             .createQueryBuilder()
             .update(Post)
             .set({ points: () => `points + ${realValue * 2}` }) //points needs to move 2x when changing vote
@@ -82,14 +82,14 @@ export class PostResolver {
         });
       } else if (!upvote) {
         // has not voted on post yet
-        await getConnection().transaction(async () => {
-          await Upvote.insert({
+        await getConnection().transaction(async (tm) => {
+          await tm.insert(Upvote, {
             userId,
             postId,
             value: realValue
           });
 
-          await getConnection()
+          await tm
             .createQueryBuilder()
             .update(Post)
             .set({ points: () => `points + ${realValue}` })

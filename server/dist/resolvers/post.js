@@ -65,8 +65,8 @@ let PostResolver = class PostResolver {
             const upvote = yield Upvote_1.Upvote.findOne({ where: { postId, userId } });
             try {
                 if (upvote && upvote.value !== realValue) {
-                    yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
-                        yield typeorm_1.getConnection()
+                    yield typeorm_1.getConnection().transaction((tm) => __awaiter(this, void 0, void 0, function* () {
+                        yield tm
                             .createQueryBuilder()
                             .update(Upvote_1.Upvote)
                             .set({ value: realValue })
@@ -75,7 +75,7 @@ let PostResolver = class PostResolver {
                             userId
                         })
                             .execute();
-                        yield typeorm_1.getConnection()
+                        yield tm
                             .createQueryBuilder()
                             .update(Post_1.Post)
                             .set({ points: () => `points + ${realValue * 2}` })
@@ -84,13 +84,13 @@ let PostResolver = class PostResolver {
                     }));
                 }
                 else if (!upvote) {
-                    yield typeorm_1.getConnection().transaction(() => __awaiter(this, void 0, void 0, function* () {
-                        yield Upvote_1.Upvote.insert({
+                    yield typeorm_1.getConnection().transaction((tm) => __awaiter(this, void 0, void 0, function* () {
+                        yield tm.insert(Upvote_1.Upvote, {
                             userId,
                             postId,
                             value: realValue
                         });
-                        yield typeorm_1.getConnection()
+                        yield tm
                             .createQueryBuilder()
                             .update(Post_1.Post)
                             .set({ points: () => `points + ${realValue}` })

@@ -16,11 +16,15 @@ const VotePanel: React.FC<VotePanelProps> = ({ post }) => {
         icon="chevron-up"
         isLoading={fetching}
         onClick={async () => {
+          if (post.voteStatus === 1) {
+            return;
+          }
           await vote({
             postId: post.id,
             value: 1,
           });
         }}
+        variantColor={post.voteStatus == 1 ? "green" : undefined}
       />
       {post.points}
       <IconButton
@@ -28,11 +32,15 @@ const VotePanel: React.FC<VotePanelProps> = ({ post }) => {
         icon="chevron-down"
         isLoading={fetching}
         onClick={async () => {
+          if (post.voteStatus === -1) {
+            return;
+          }
           await vote({
             postId: post.id,
             value: -1,
           });
         }}
+        variantColor={post.voteStatus == -1 ? "red" : undefined}
       />
     </Flex>
   );

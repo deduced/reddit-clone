@@ -164,7 +164,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
 
               cache.writeFragment(
                 gql`
-                  fragment _ on Post {
+                  fragment __ on Post {
                     points
                   }
                 `,

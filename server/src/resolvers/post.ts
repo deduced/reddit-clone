@@ -103,15 +103,6 @@ export class PostResolver {
       console.log(error);
       return false;
     }
-
-    // getConnection().query(
-    //   `
-    // update post p
-    // set p.points = p.points + $1
-    // where p.id = $2
-    // `,
-    //   [realValue, postId]
-    // );
   }
 
   @Query(() => PaginatedPosts)

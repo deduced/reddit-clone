@@ -31,7 +31,12 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     //User is logged in
   } else {
     body = (
-      <Flex>
+      <Flex alignItems="center">
+        <Button as={Link} mr={2}>
+          <NextLink href="create-post">
+            <Link>create post</Link>
+          </NextLink>
+        </Button>
         <Box mr={2}>{data.me.username}</Box>
         <Button
           isLoading={isFetchingLogout}
@@ -46,19 +51,21 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
 
   return (
     <Flex
-      alignItems="baseline"
+      justifyContent="center"
       position="sticky"
       top={0}
       bg="tan"
       p={4}
       zIndex={1}
     >
-      <NextLink href="/">
-        <Link>
-          <Heading>Reddit-Clone</Heading>
-        </Link>
-      </NextLink>
-      <Box ml={"auto"}>{body}</Box>
+      <Flex flex={1} maxWidth={800}>
+        <NextLink href="/">
+          <Link>
+            <Heading>Reddit-Clone</Heading>
+          </Link>
+        </NextLink>
+        <Box ml={"auto"}>{body}</Box>
+      </Flex>
     </Flex>
   );
 };

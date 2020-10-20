@@ -25,11 +25,6 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex justifyContent="flex-end">
-        <NextLink href="create-post">
-          <Link>create post</Link>
-        </NextLink>
-      </Flex>
       {isLoading && !data && <div>loading...</div>}
 
       {!isLoading && data && (

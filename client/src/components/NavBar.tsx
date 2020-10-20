@@ -45,7 +45,14 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Flex position="sticky" top={0} bg="tan" p={4} zIndex={1}>
+    <Flex
+      alignItems="baseline"
+      position="sticky"
+      top={0}
+      bg="tan"
+      p={4}
+      zIndex={1}
+    >
       <NextLink href="/">
         <Link>
           <Heading>Reddit-Clone</Heading>

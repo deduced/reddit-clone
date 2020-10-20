@@ -25,8 +25,7 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex justifyContent="space-between" alignItems="baseline">
-        <Heading mb={4}>Reddit-Clone</Heading>
+      <Flex justifyContent="flex-end">
         <NextLink href="create-post">
           <Link>create post</Link>
         </NextLink>

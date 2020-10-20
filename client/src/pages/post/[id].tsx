@@ -1,4 +1,4 @@
-import { Heading } from "@chakra-ui/core";
+import { Box, Heading } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React from "react";
@@ -27,7 +27,20 @@ const Post: React.FC<{}> = ({}) => {
     );
   }
 
-  return <Layout>{data?.post?.text}</Layout>;
+  if (!data?.post) {
+    return (
+      <Layout>
+        <Box>Could not find Post!</Box>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <Heading mb={4}>{data.post.title}</Heading>
+      {data.post.text}
+    </Layout>
+  );
 };
 
 export default withUrqlClient(createUrqlClient, { ssr: true })(Post);

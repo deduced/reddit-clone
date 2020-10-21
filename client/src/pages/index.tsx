@@ -1,11 +1,25 @@
-import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  IconButton,
+  Link,
+  Stack,
+  Text,
+} from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import VotePanel from "../components/VotePanel";
-import { usePostsQuery } from "../generated/graphql";
+import {
+  useDeletePostMutation,
+  useMeQuery,
+  usePostsQuery,
+} from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
+import { isServer } from "../utils/isServer";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -16,6 +30,11 @@ const Index = () => {
   const [{ data, fetching: isLoading }] = usePostsQuery({
     variables,
   });
+
+  const [{ data: userData }] = useMeQuery();
+  const userId = userData?.me?.id;
+
+  const [, deletePost] = useDeletePostMutation();
 
   if (!isLoading && !data) {
     return (
@@ -31,11 +50,11 @@ const Index = () => {
         <Stack spacing={8}>
           {data.posts.posts.map((post) => (
             <Flex
+              alignItems="center"
+              borderWidth="1px"
               key={post.id}
               p={5}
               shadow="md"
-              borderWidth="1px"
-              alignItems="center"
             >
               <VotePanel post={post} />
               <Box>
@@ -47,6 +66,17 @@ const Index = () => {
                 <Text>posted by {post.creator.username}</Text>
                 <Text mt={4}>{post.textSnippet}</Text>
               </Box>
+              {post.creator.id === userId && (
+                <IconButton
+                  aria-label="delete post"
+                  icon="delete"
+                  marginLeft="auto"
+                  variantColor="red"
+                  onClick={() => {
+                    deletePost({ id: post.id });
+                  }}
+                />
+              )}
             </Flex>
           ))}
         </Stack>

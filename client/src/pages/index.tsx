@@ -48,37 +48,41 @@ const Index = () => {
 
       {!isLoading && data && (
         <Stack spacing={8}>
-          {data.posts.posts.map((post) => (
-            <Flex
-              alignItems="center"
-              borderWidth="1px"
-              key={post.id}
-              p={5}
-              shadow="md"
-            >
-              <VotePanel post={post} />
-              <Box>
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-                  <Link>
-                    <Heading fontSize="xl">{post.title}</Heading>
-                  </Link>
-                </NextLink>
-                <Text>posted by {post.creator.username}</Text>
-                <Text mt={4}>{post.textSnippet}</Text>
-              </Box>
-              {post.creator.id === userId && (
+          {data.posts.posts.map((post) =>
+            //when invalidating cache after a post deletion, a post may be null
+            //so check for null and show nothing.
+            !post ? null : (
+              <Flex
+                alignItems="center"
+                borderWidth="1px"
+                key={post.id}
+                p={5}
+                shadow="md"
+              >
+                <VotePanel post={post} />
+                <Box>
+                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{post.title}</Heading>
+                    </Link>
+                  </NextLink>
+                  <Text>posted by {post.creator.username}</Text>
+                  <Text mt={4}>{post.textSnippet}</Text>
+                </Box>
+
                 <IconButton
                   aria-label="delete post"
                   icon="delete"
+                  isDisabled={post.creator.id !== userId}
                   marginLeft="auto"
                   variantColor="red"
                   onClick={() => {
                     deletePost({ id: post.id });
                   }}
                 />
-              )}
-            </Flex>
-          ))}
+              </Flex>
+            )
+          )}
         </Stack>
       )}
 

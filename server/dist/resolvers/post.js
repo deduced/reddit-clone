@@ -27,6 +27,7 @@ const type_graphql_1 = require("type-graphql");
 const Post_1 = require("../entities/Post");
 const typeorm_1 = require("typeorm");
 const Upvote_1 = require("../entities/Upvote");
+const User_1 = require("../entities/User");
 let PostInput = class PostInput {
 };
 __decorate([
@@ -56,6 +57,9 @@ PaginatedPosts = __decorate([
 let PostResolver = class PostResolver {
     textSnippet(root) {
         return `${root.text.slice(0, 100)}...`;
+    }
+    creator(post) {
+        return User_1.User.findOne(post.creatorId);
     }
     vote(postId, value, { req }) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -122,19 +126,10 @@ let PostResolver = class PostResolver {
             const posts = yield typeorm_1.getConnection().query(`
     
     select p.*, 
-    json_build_object(
-      'id', u.id,
-      'username', u.username,
-      'email', u.email,
-      'createdAt', u."createdAt",
-      'updatedAt', u."updatedAt"
-      
-      ) creator,
       ${req.session.userId
                 ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"'
                 : 'null as "voteStatus"'}
     from post p
-    inner join public.user u on u.id = p."creatorId"
     ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}
     order by p."createdAt" DESC
     limit $1
@@ -147,7 +142,7 @@ let PostResolver = class PostResolver {
         });
     }
     post(id) {
-        return Post_1.Post.findOne(id, { relations: ["creator"] });
+        return Post_1.Post.findOne(id);
     }
     createPost(input, { req }) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -192,6 +187,13 @@ __decorate([
     __metadata("design:paramtypes", [Post_1.Post]),
     __metadata("design:returntype", void 0)
 ], PostResolver.prototype, "textSnippet", null);
+__decorate([
+    type_graphql_1.FieldResolver(() => User_1.User),
+    __param(0, type_graphql_1.Root()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Post_1.Post]),
+    __metadata("design:returntype", void 0)
+], PostResolver.prototype, "creator", null);
 __decorate([
     type_graphql_1.Mutation(() => Boolean),
     type_graphql_1.UseMiddleware(isAuth_1.isAuth),

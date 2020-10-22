@@ -18,6 +18,7 @@ import { Post } from "../entities/Post";
 import { MyContext } from "../types";
 import { getConnection } from "typeorm";
 import { Upvote } from "../entities/Upvote";
+import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
@@ -43,6 +44,11 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return `${root.text.slice(0, 100)}...`;
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() post: Post) {
+    return User.findOne(post.creatorId);
   }
 
   @Mutation(() => Boolean)
@@ -131,21 +137,12 @@ export class PostResolver {
       `
     
     select p.*, 
-    json_build_object(
-      'id', u.id,
-      'username', u.username,
-      'email', u.email,
-      'createdAt', u."createdAt",
-      'updatedAt', u."updatedAt"
-      
-      ) creator,
       ${
         req.session.userId
           ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"'
           : 'null as "voteStatus"'
       }
     from post p
-    inner join public.user u on u.id = p."creatorId"
     ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}
     order by p."createdAt" DESC
     limit $1
@@ -153,23 +150,6 @@ export class PostResolver {
     `,
       replacements
     );
-
-    // const qb = getConnection()
-    //   .getRepository(Post)
-    //   .createQueryBuilder("p") //alias
-    //   .innerJoinAndSelect("p.creator", "u", 'u.id = p."creatorId"')
-    //   .orderBy('p."createdAt"', "DESC")
-    //   .take(realLimitPlusOne); //recommended rather than limit for pagination https://typeorm.io/#select-query-builder/adding-limit-expression
-
-    // if (cursor) {
-    //   qb.where(`p."createdAt" < :cursor`, {
-    //     cursor: new Date(parseInt(cursor))
-    //   });
-    // }
-
-    // const posts = await qb.getMany();
-
-    // console.log("Posts: ", posts);
 
     return {
       posts: posts.slice(0, realLimit),
@@ -179,7 +159,7 @@ export class PostResolver {
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne(id, { relations: ["creator"] });
+    return Post.findOne(id);
   }
 
   @Mutation(() => Post)

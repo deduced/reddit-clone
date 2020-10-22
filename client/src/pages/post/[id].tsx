@@ -2,12 +2,15 @@ import { Box, Heading } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import React from "react";
 import { Layout } from "../../components/Layout";
+import PostActionButtons from "../../components/PostActionButtons";
+import { useMeQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";
 
 const Post: React.FC<{}> = ({}) => {
-  const { response } = useGetPostFromUrl();
+  const [{ data: currentUserData }] = useMeQuery();
 
+  const { response } = useGetPostFromUrl();
   const [{ data, fetching: isFetching }] = response;
 
   if (isFetching) {
@@ -28,8 +31,13 @@ const Post: React.FC<{}> = ({}) => {
 
   return (
     <Layout>
-      <Heading mb={4}>{data.post.title}</Heading>
-      {data.post.text}
+      <Box mb={4}>
+        <Heading mb={4}>{data.post.title}</Heading>
+        {data.post.text}
+      </Box>
+      {currentUserData?.me?.id === data.post.creator.id && (
+        <PostActionButtons id={data.post.id} />
+      )}
     </Layout>
   );
 };

@@ -1,4 +1,4 @@
-import { Flex, IconButton } from "@chakra-ui/core";
+import { IconButton } from "@chakra-ui/core";
 import React from "react";
 import NextLink from "next/link";
 import { useDeletePostMutation } from "../generated/graphql";

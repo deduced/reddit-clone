@@ -16,6 +16,7 @@ import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import path from "path";
 import { Upvote } from "./entities/Upvote";
+import createUserLoader from "./utils/createUserLoader";
 
 const main = async () => {
   const conn = await createConnection({
@@ -72,7 +73,12 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false
     }),
-    context: ({ req, res }) => ({ req, res, redis })
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader()
+    })
   });
 
   //create graphql endpoint on express

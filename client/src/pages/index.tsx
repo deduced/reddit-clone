@@ -14,7 +14,7 @@ const Index = () => {
     cursor: null as string | null,
   });
 
-  const [{ data, fetching: isLoading }] = usePostsQuery({
+  const [{ data, error, fetching: isLoading }] = usePostsQuery({
     variables,
   });
 
@@ -23,7 +23,10 @@ const Index = () => {
 
   if (!isLoading && !data) {
     return (
-      <Text color="#eb0000">Something went wrong! Reload and try again</Text>
+      <>
+        <Text color="#eb0000">Something went wrong!</Text>
+        <Text>Error is {error?.message}</Text>
+      </>
     );
   }
 

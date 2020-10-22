@@ -58,8 +58,8 @@ let PostResolver = class PostResolver {
     textSnippet(root) {
         return `${root.text.slice(0, 100)}...`;
     }
-    creator(post) {
-        return User_1.User.findOne(post.creatorId);
+    creator(post, { userLoader }) {
+        return userLoader.load(post.creatorId);
     }
     vote(postId, value, { req }) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -189,9 +189,9 @@ __decorate([
 ], PostResolver.prototype, "textSnippet", null);
 __decorate([
     type_graphql_1.FieldResolver(() => User_1.User),
-    __param(0, type_graphql_1.Root()),
+    __param(0, type_graphql_1.Root()), __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Post_1.Post]),
+    __metadata("design:paramtypes", [Post_1.Post, Object]),
     __metadata("design:returntype", void 0)
 ], PostResolver.prototype, "creator", null);
 __decorate([

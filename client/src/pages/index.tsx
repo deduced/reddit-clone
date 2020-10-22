@@ -60,7 +60,7 @@ const Index = () => {
                 shadow="md"
               >
                 <VotePanel post={post} />
-                <Box>
+                <Box paddingRight={5}>
                   <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                     <Link>
                       <Heading fontSize="xl">{post.title}</Heading>
@@ -69,17 +69,23 @@ const Index = () => {
                   <Text>posted by {post.creator.username}</Text>
                   <Text mt={4}>{post.textSnippet}</Text>
                 </Box>
-
-                <IconButton
-                  aria-label="delete post"
-                  icon="delete"
-                  isDisabled={post.creator.id !== userId}
-                  marginLeft="auto"
-                  variantColor="red"
-                  onClick={() => {
-                    deletePost({ id: post.id });
-                  }}
-                />
+                {post.creator.id === userId && (
+                  <Flex ml="auto">
+                    <NextLink
+                      href="/post/edit/[id]"
+                      as={`/post/edit/${post.id}`}
+                    >
+                      <IconButton aria-label="edit post" icon="edit" mr={2} />
+                    </NextLink>
+                    <IconButton
+                      aria-label="delete post"
+                      icon="delete"
+                      onClick={() => {
+                        deletePost({ id: post.id });
+                      }}
+                    />
+                  </Flex>
+                )}
               </Flex>
             )
           )}

@@ -1,25 +1,12 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/core";
+import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
+import PostActionButtons from "../components/PostActionButtons";
 import VotePanel from "../components/VotePanel";
-import {
-  useDeletePostMutation,
-  useMeQuery,
-  usePostsQuery,
-} from "../generated/graphql";
+import { useMeQuery, usePostsQuery } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { isServer } from "../utils/isServer";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -33,8 +20,6 @@ const Index = () => {
 
   const [{ data: userData }] = useMeQuery();
   const userId = userData?.me?.id;
-
-  const [, deletePost] = useDeletePostMutation();
 
   if (!isLoading && !data) {
     return (
@@ -71,19 +56,7 @@ const Index = () => {
                 </Box>
                 {post.creator.id === userId && (
                   <Flex ml="auto">
-                    <NextLink
-                      href="/post/edit/[id]"
-                      as={`/post/edit/${post.id}`}
-                    >
-                      <IconButton aria-label="edit post" icon="edit" mr={2} />
-                    </NextLink>
-                    <IconButton
-                      aria-label="delete post"
-                      icon="delete"
-                      onClick={() => {
-                        deletePost({ id: post.id });
-                      }}
-                    />
+                    <PostActionButtons id={post.id} />
                   </Flex>
                 )}
               </Flex>

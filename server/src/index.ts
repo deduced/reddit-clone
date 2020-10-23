@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "dotenv-safe/config";
 import { createConnection } from "typeorm";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -22,8 +23,7 @@ import createUpvoteLoader from "./utils/createUpvoteLoader";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    database: "reddit_clone_dev",
-    username: "charlieastrada",
+    url: process.env.DATABASE_URL,
     logging: true,
     synchronize: true,
     entities: [Post, User, Upvote],
@@ -34,11 +34,11 @@ const main = async () => {
 
   // await Post.delete({});
 
-  const port = 4000; //TODO set as env variable
+  const port = parseInt(process.env.PORT);
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
 
   //apply cors globally (all routes)
   //set to work with client cookies
@@ -64,7 +64,7 @@ const main = async () => {
         secure: process.env.NODE_ENV === "production" //cookie only works in https
       },
       saveUninitialized: false, //do not store empty session
-      secret: "asldkjflwrwerbasdfhasdf", //TODO: put this in an env variable
+      secret: process.env.SESSION_SECRET,
       resave: false
     })
   );

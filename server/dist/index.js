@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
+require("dotenv-safe/config");
 const typeorm_1 = require("typeorm");
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
@@ -34,18 +35,17 @@ const createUpvoteLoader_1 = __importDefault(require("./utils/createUpvoteLoader
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const conn = yield typeorm_1.createConnection({
         type: "postgres",
-        database: "reddit_clone_dev",
-        username: "charlieastrada",
+        url: process.env.DATABASE_URL,
         logging: true,
         synchronize: true,
         entities: [Post_1.Post, User_1.User, Upvote_1.Upvote],
         migrations: [path_1.default.join(__dirname, "./migrations/*")]
     });
     yield conn.runMigrations();
-    const port = 4000;
+    const port = parseInt(process.env.PORT);
     const app = express_1.default();
     const RedisStore = connect_redis_1.default(express_session_1.default);
-    const redis = new ioredis_1.default();
+    const redis = new ioredis_1.default(process.env.REDIS_URL);
     app.use(cors_1.default({
         origin: "http://localhost:3000",
         credentials: true
@@ -64,7 +64,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             secure: process.env.NODE_ENV === "production"
         },
         saveUninitialized: false,
-        secret: "asldkjflwrwerbasdfhasdf",
+        secret: process.env.SESSION_SECRET,
         resave: false
     }));
     const apolloServer = new apollo_server_express_1.ApolloServer({

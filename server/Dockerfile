@@ -13,6 +13,7 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+COPY .env.production .env
 
 #Generate dist structure 
 RUN npm run build

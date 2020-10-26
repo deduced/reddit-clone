@@ -119,7 +119,7 @@ let UserResolver = class UserResolver {
             const token = uuid_1.v4();
             const key = constants_1.FORGET_PASSWORD_PREFIX + token;
             yield redis.set(key, user.id, "ex", 1000 * 60 * 60 * 24 * 3);
-            yield sendEmail_1.sendEmail(email, "Password Reset", `<a href="http://localhost:3000/change-password/${token}">Reset Password</a>`);
+            yield sendEmail_1.sendEmail(email, "Password Reset", `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Reset Password</a>`);
             return true;
         });
     }

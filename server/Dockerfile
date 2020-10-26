@@ -8,14 +8,13 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 
-# generate js from ts in dist folder
 RUN npm install
 
 # Bundle app source
 COPY . .
 COPY .env.production .env
 
-#Generate dist structure 
+# generate js from ts in dist folder
 RUN npm run build
 
 ENV NODE_ENV production

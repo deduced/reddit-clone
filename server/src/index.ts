@@ -44,7 +44,7 @@ const main = async () => {
   //set to work with client cookies
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true
     })
   );
@@ -62,6 +62,7 @@ const main = async () => {
         httpOnly: true, //security - ensures frontend code cannot access cookie
         sameSite: "lax", //csrf protection
         secure: process.env.NODE_ENV === "production" //cookie only works in https
+        // domain: process.env.NODE_ENV === "production" ? "" : undefined
       },
       saveUninitialized: false, //do not store empty session
       secret: process.env.SESSION_SECRET,

@@ -41,7 +41,7 @@ const main = async () => {
   const redis = new Redis(process.env.REDIS_URL);
 
   //NGINX in dokku
-  app.set("proxy", 1);
+  app.set("trust proxy", 1);
 
   //apply cors globally (all routes)
   //set to work with client cookies

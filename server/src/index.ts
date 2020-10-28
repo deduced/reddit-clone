@@ -64,8 +64,8 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true, //security - ensures frontend code cannot access cookie
         sameSite: "lax", //csrf protection
-        secure: process.env.NODE_ENV === "production" //cookie only works in https
-        // domain: process.env.NODE_ENV === "production" ? "" : undefined
+        secure: process.env.NODE_ENV === "production", //cookie only works in https
+        domain: process.env.NODE_ENV === "production" ? ".xagax.net" : undefined
       },
       saveUninitialized: false, //do not store empty session
       secret: process.env.SESSION_SECRET,

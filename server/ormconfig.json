@@ -2,8 +2,8 @@
   "type": "postgres",
   "host": "localhost",
   "port": 5432,
-  "username": "charlieastrada",
-  "database": "reddit_clone",
+  "username": "",
+  "database": "",
   "entities": ["dist/entities/*.js"],
-  "migrations": ["src/migrations/*.ts"]
+  "migrations": ["dist/migrations/*.js"]
 }

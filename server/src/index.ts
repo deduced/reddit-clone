@@ -32,8 +32,6 @@ const main = async () => {
 
   await conn.runMigrations();
 
-  // await Post.delete({});
-
   const port = parseInt(process.env.PORT);
   const app = express();
 

@@ -2,7 +2,6 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class MockPosts1601243957489 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(``);
     await queryRunner.query(`
     insert into post (title, text, "creatorId", "createdAt") values ('Stanley & Iris', 'Curabitur gravida nisi at nibh. In hac habitasse platea dictumst. Aliquam augue quam, sollicitudin vitae, consectetuer eget, rutrum at, lorem.', 1, '2020-08-02T07:28:00Z');
     insert into post (title, text, "creatorId", "createdAt") values ('Don''t Move (Non ti muovere)', 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus vestibulum sagittis sapien. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
@@ -206,5 +205,8 @@ export class MockPosts1601243957489 implements MigrationInterface {
             `);
   }
 
-  public async down(_: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    // await queryRunner.query(`TRUNCATE table upvote`);
+    await queryRunner.query(`TRUNCATE table post CASCADE`);
+  }
 }
